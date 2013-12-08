@@ -1,2 +1,2 @@
-pi-ed-pedal
+The Pi'ed Pedal
 ===========
