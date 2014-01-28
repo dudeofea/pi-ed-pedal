@@ -47,7 +47,9 @@ int main (int argc, char *argv[])
 
         /* try to become a client of the JACK server */
 
-        if ((client = jack_client_new ("pedal")) == 0) {
+	jack_status_t err;
+        client = jack_client_open ("pedal", JackNullOption, &err);
+	if(0){
                 fprintf (stderr, "jack server not running?\n");
                 return 1;
         }
