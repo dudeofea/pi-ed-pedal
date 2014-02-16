@@ -24,6 +24,10 @@ int process (jack_nframes_t nframes, void *arg)
         jack_default_audio_sample_t *out = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port, nframes);
         jack_default_audio_sample_t *in = (jack_default_audio_sample_t *) jack_port_get_buffer (input_port, nframes);
 
+	for(int i = 0; i < nframes; i++){
+		in[i] *= 5;	//gain of 5
+	}
+
         memcpy (out, in, sizeof (jack_default_audio_sample_t) * nframes);
 
         return 0;
