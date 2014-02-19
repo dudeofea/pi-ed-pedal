@@ -1,7 +1,7 @@
-/** @file simple_client.c
+/** file jack_client.c
 *
-* @brief This is very simple client that demonstrates the basic
-* features of JACK as they would be used by many applications.
+* mostly copied off of the simple_client.c code since it was the
+* only thing around.
 */
 
 #include <stdio.h>
@@ -15,6 +15,13 @@
 jack_port_t *input_port;
 jack_port_t *output_port;
 
+float test_effect(float in){
+	static float last = 0;
+	float val = 0.01*in + 0.99*last;
+	last = val;
+	return val;
+}
+
 /**
 * The process callback for this JACK application.
 * It is called by JACK at the appropriate times.
@@ -24,11 +31,13 @@ int process (jack_nframes_t nframes, void *arg)
         jack_default_audio_sample_t *out = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port, nframes);
         jack_default_audio_sample_t *in = (jack_default_audio_sample_t *) jack_port_get_buffer (input_port, nframes);
 
+	//TODO: add FFT processing of sample array
 	for(int i = 0; i < nframes; i++){
-		in[i] *= 5;	//gain of 5
+		in[i] = test_effect(in[i]);
+		out[i] = in[i];
 	}
 
-        memcpy (out, in, sizeof (jack_default_audio_sample_t) * nframes);
+        //memcpy (out, in, sizeof (jack_default_audio_sample_t) * nframes);
 
         return 0;
 }
