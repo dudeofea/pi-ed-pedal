@@ -11,9 +11,15 @@
 #include <string.h>
 
 #include <jack/jack.h>
+#include <fftw3.h>
+
+#define BUFFER_LEN 128
 
 jack_port_t *input_port;
 jack_port_t *output_port;
+
+fftw_plan p;
+fftw_complex fft_in[BUFFER_LEN], fft_out[BUFFER_LEN];
 
 float test_effect(float in){
 	static float last = 0;
@@ -31,9 +37,17 @@ int process (jack_nframes_t nframes, void *arg)
         jack_default_audio_sample_t *out = (jack_default_audio_sample_t *) jack_port_get_buffer (output_port, nframes);
         jack_default_audio_sample_t *in = (jack_default_audio_sample_t *) jack_port_get_buffer (input_port, nframes);
 
-	//TODO: add FFT processing of sample array
+	//Copy data to FFT-input buffer
+	for(int i = 0; i < BUFFER_LEN; i++){
+		fft_in[i][0] = in[i];
+	}
+	//Run FFT
+	fftw_execute(p);
+	if(nframes != BUFFER_LEN){
+		printf("val: %d\n", nframes);
+	}
 	for(int i = 0; i < nframes; i++){
-		in[i] = test_effect(in[i]);
+		//in[i] = test_effect(in[i]);
 		out[i] = in[i];
 	}
 
@@ -85,6 +99,9 @@ int main (int argc, char *argv[])
 
         printf ("engine sample rate: %" PRIu32 "\n",
                 jack_get_sample_rate (client));
+	/* Initialize FFT*/
+	p = fftw_plan_dft_1d(BUFFER_LEN, fft_in, fft_out, FFTW_FORWARD, FFTW_MEASURE);
+
          /* create two ports */
 
         input_port = jack_port_register (client, "input", JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
@@ -129,5 +146,6 @@ int main (int argc, char *argv[])
 
         sleep (10);
         jack_client_close (client);
+	fftw_destroy_plan(p);
         exit (0);
 }
