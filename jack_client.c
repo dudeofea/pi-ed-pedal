@@ -9,11 +9,13 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
+#include <stdbool.h>
 
 #include <jack/jack.h>
 #include <fftw3.h>
 
-#define BUFFER_LEN 128
+#include "effects.h"
 
 jack_port_t *input_port;
 jack_port_t *output_port;
@@ -21,11 +23,13 @@ jack_port_t *output_port;
 fftw_plan p;
 fftw_complex fft_in[BUFFER_LEN], fft_out[BUFFER_LEN];
 
-float test_effect(float in){
-	static float last = 0;
-	float val = 0.01*in + 0.99*last;
-	last = val;
-	return val;
+static bool running = true;
+
+/**
+* Sigint handler for shutting down client
+*/
+void intHandler(){
+	running = false;
 }
 
 /**
@@ -43,13 +47,8 @@ int process (jack_nframes_t nframes, void *arg)
 	}
 	//Run FFT
 	fftw_execute(p);
-	if(nframes != BUFFER_LEN){
-		printf("val: %d\n", nframes);
-	}
-	for(int i = 0; i < nframes; i++){
-		//in[i] = test_effect(in[i]);
-		out[i] = in[i];
-	}
+	//Run all pedal effects
+	run_effects(in, out, fft_out);
 
         //memcpy (out, in, sizeof (jack_default_audio_sample_t) * nframes);
 
@@ -63,7 +62,7 @@ int process (jack_nframes_t nframes, void *arg)
  */
 void jack_shutdown (void *arg)
 {
-
+	fftw_destroy_plan(p);
         exit (1);
 }
 
@@ -144,7 +143,11 @@ int main (int argc, char *argv[])
 
         /* Since this is just a toy, run for a few seconds, then finish */
 
-        sleep (10);
+	//Set signal handler
+	signal(SIGINT, intHandler);
+	while(running){
+        	sleep (5);
+	}
         jack_client_close (client);
 	fftw_destroy_plan(p);
         exit (0);

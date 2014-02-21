@@ -1,0 +1,7 @@
+TODO LIST:
+
+----effects.c----
+* add tuner effect
+
+--jack_client.c--
+* fix buzzing that eventually happens
