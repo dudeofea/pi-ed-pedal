@@ -1,7 +1,8 @@
 TODO LIST:
 
 ----effects.c----
+* find fundamental freq
 * add tuner effect
 
 --jack_client.c--
-* fix buzzing that eventually happens
+* mess around with buffer settings

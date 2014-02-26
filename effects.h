@@ -2,8 +2,8 @@
 #define _EFFECTS_H_
 #include <fftw3.h>
 
-#define BUFFER_LEN 128
+#define BUFFER_LEN 256
 
-void run_effects(float* in, float* out, fftw_complex* fft_out);
+int run_effects(float* in, float* out, fftw_complex* fft_out);
 
 #endif
