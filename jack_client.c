@@ -16,6 +16,7 @@
 #include <fftw3.h>
 
 #include "effects.h"
+#include "print_array.h"
 
 jack_port_t *input_port;
 jack_port_t *output_port;
@@ -48,7 +49,8 @@ int process (jack_nframes_t nframes, void *arg)
 	//Run FFT
 	fftw_execute(p);
 	//Run all pedal effects
-	run_effects(in, out, fft_out);
+	//run_effects(in, out, fft_out);
+	//print_array(&fft_out[0], 0.5, 10);
 
         //memcpy (out, in, sizeof (jack_default_audio_sample_t) * nframes);
 
@@ -62,6 +64,7 @@ int process (jack_nframes_t nframes, void *arg)
  */
 void jack_shutdown (void *arg)
 {
+	//endwin();
 	fftw_destroy_plan(p);
         exit (1);
 }
@@ -100,6 +103,8 @@ int main (int argc, char *argv[])
                 jack_get_sample_rate (client));
 	/* Initialize FFT*/
 	p = fftw_plan_dft_1d(BUFFER_LEN, fft_in, fft_out, FFTW_FORWARD, FFTW_MEASURE);
+
+	//initscr();
 
          /* create two ports */
 
@@ -149,6 +154,7 @@ int main (int argc, char *argv[])
         	sleep (5);
 	}
         jack_client_close (client);
+	//endwin();
 	fftw_destroy_plan(p);
         exit (0);
 }
