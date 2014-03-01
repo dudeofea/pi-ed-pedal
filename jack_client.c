@@ -50,7 +50,7 @@ int process (jack_nframes_t nframes, void *arg)
 	fftw_execute(p);
 	//Run all pedal effects
 	//run_effects(in, out, fft_out);
-	//print_array(&fft_out[0], 0.5, 10);
+	print_array(fft_out, BUFFER_LEN);
 
         //memcpy (out, in, sizeof (jack_default_audio_sample_t) * nframes);
 
@@ -64,7 +64,7 @@ int process (jack_nframes_t nframes, void *arg)
  */
 void jack_shutdown (void *arg)
 {
-	//endwin();
+	endwin();
 	fftw_destroy_plan(p);
         exit (1);
 }
@@ -104,7 +104,7 @@ int main (int argc, char *argv[])
 	/* Initialize FFT*/
 	p = fftw_plan_dft_1d(BUFFER_LEN, fft_in, fft_out, FFTW_FORWARD, FFTW_MEASURE);
 
-	//initscr();
+	initscr();
 
          /* create two ports */
 
@@ -154,7 +154,7 @@ int main (int argc, char *argv[])
         	sleep (5);
 	}
         jack_client_close (client);
-	//endwin();
+	endwin();
 	fftw_destroy_plan(p);
         exit (0);
 }

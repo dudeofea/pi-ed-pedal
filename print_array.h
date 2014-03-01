@@ -3,6 +3,6 @@
 
 #include <ncurses.h>
 
-void print_array(double arr[], double scale, int size);
+void print_array(double (*arr)[2], int size);
 
 #endif
