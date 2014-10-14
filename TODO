@@ -3,6 +3,3 @@ TODO LIST:
 ----effects.c----
 * find fundamental freq
 * add tuner effect
-
---jack_client.c--
-* mess around with buffer settings

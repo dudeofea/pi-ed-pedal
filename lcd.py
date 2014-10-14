@@ -122,5 +122,4 @@ if __name__ == "__main__":
         screen.clear()
         screen.message("Effect 56\n")
         screen.message("Super Buzzer")
-        raw_input()
         GPIO.cleanup()
