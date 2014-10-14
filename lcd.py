@@ -49,16 +49,22 @@ class LCD:
         LCD_5x10DOTS                   = 0x04
         LCD_5x8DOTS                    = 0x00
 
-        def __init__(self, RS=2, EN=3, DB=[22,27,17,4]):
+        def __init__(self, RS=2, EN=3, DB=[22,27,17,4], RGB=[9,10,11]):
                 self.RS = RS
                 self.EN = EN
                 self.DB = DB
+                self.RGB = []
 
                 GPIO.setmode(GPIO.BCM)
+                GPIO.setwarnings(False) #disable warnings
                 GPIO.setup(self.RS, GPIO.OUT)
                 GPIO.setup(self.EN, GPIO.OUT)
                 for pin in self.DB:
                         GPIO.setup(pin, GPIO.OUT)
+                for x in xrange(0, len(RGB)):
+                        GPIO.setup(RGB[x], GPIO.OUT)
+                        self.RGB.append(GPIO.PWM(RGB[x], 50))
+                        self.RGB[x].start(100) #start at 100%
 
                 self.write4bits(0x33) # initialization
                 self.write4bits(0x32) # initialization
@@ -116,10 +122,21 @@ class LCD:
                                 self.write4bits(0xC0) # next line
                         else:
                                 self.write4bits(ord(char),True)
+        def color(self, r, g, b):
+                pass
+                self.RGB[0].ChangeDutyCycle(100*(1-r)) #red
+                self.RGB[1].ChangeDutyCycle(100*(1-g)) #green
+                self.RGB[2].ChangeDutyCycle(100*(1-b)) #blue
 
 if __name__ == "__main__":
         screen = LCD()
         screen.clear()
         screen.message("Effect 56\n")
         screen.message("Super Buzzer")
-        GPIO.cleanup()
+        #scroll through all colors
+        for r in xrange(0,10):
+                for g in xrange(1,10):
+                        for b in xrange(1,10):
+                               screen.color(float(r)/10, float(g)/10, float(b)/10)
+                               sleep(0.1)
+        #GPIO.cleanup()
