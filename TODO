@@ -3,3 +3,6 @@ TODO LIST:
 ----effects.c----
 * find fundamental freq
 * add tuner effect
+
+----lcd.py-------
+* add HSV color function (http://www.rapidtables.com/convert/color/hsv-to-rgb.htm)
