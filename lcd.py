@@ -5,6 +5,8 @@
 
 import RPi.GPIO as GPIO
 from time import sleep
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 class LCD:
         # commands
@@ -128,15 +130,40 @@ class LCD:
                 self.RGB[1].ChangeDutyCycle(100*(1-g)) #green
                 self.RGB[2].ChangeDutyCycle(100*(1-b)) #blue
 
+class LCDFileWatcher(FileSystemEventHandler):
+    def __init__(self, file):
+        self.filename = file
+        self.screen = LCD()
+        self.screen.clear()
+    def on_modified(self, event):
+        if(event.src_path.find(self.filename) >= 0):
+            with open(event.src_path, 'r') as myfile:
+                lines = myfile.readlines()
+                if len(lines) < 3:
+                    return
+                #first is color
+                color_str = lines[0].replace('#', '')
+                r = float(int(color_str[0:2], 16)) / 255
+                g = float(int(color_str[2:4], 16)) / 255
+                b = float(int(color_str[4:6], 16)) / 255
+                #next is each message
+                line1 = lines[1].replace('\n', '')
+                line2 = lines[2].replace('\n', '')
+                #send to screen
+                self.screen.clear()
+                self.screen.message(line1+"\n"+line2)
+                self.screen.color(r, g, b)
+
 if __name__ == "__main__":
-        screen = LCD()
-        screen.clear()
-        screen.message("Effect 56\n")
-        screen.message("Super Buzzer")
-        #scroll through all colors
-        for r in xrange(0,10):
-                for g in xrange(1,10):
-                        for b in xrange(1,10):
-                               screen.color(float(r)/10, float(g)/10, float(b)/10)
-                               sleep(0.1)
-        #GPIO.cleanup()
+    event_handler = LCDFileWatcher('lcd.txt')
+    observer = Observer()
+    observer.schedule(event_handler, path='.', recursive=False)
+    observer.start()
+
+    try:
+        while True:
+            sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
+    GPIO.cleanup()
